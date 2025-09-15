@@ -1,0 +1,69 @@
+Chams Menu
+
+```[DllImport("kernel32.dll", SetLastError = true)]
+static extern IntPtr OpenProcess(uint processAccess, bool bInheritHandle, int processId);
+
+[DllImport("kernel32.dll", SetLastError = true)]
+static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
+
+[DllImport("kernel32.dll", SetLastError = true)]
+static extern IntPtr GetModuleHandle(string lpModuleName);
+
+[DllImport("kernel32.dll", SetLastError = true)]
+static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress, IntPtr dwSize, uint flAllocationType, uint flProtect);
+
+[DllImport("kernel32.dll", SetLastError = true)]
+static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out IntPtr lpNumberOfBytesWritten);
+
+[DllImport("kernel32.dll")]
+static extern IntPtr CreateRemoteThread(IntPtr hProcess, IntPtr lpThreadAttribute, IntPtr dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
+
+const uint PROCESS_CREATE_THREAD = 0x2;
+const uint PROCESS_QUERY_INFORMATION = 0x400;
+const uint PROCESS_VM_OPERATION = 0x8;
+const uint PROCESS_VM_WRITE = 0x20;
+const uint PROCESS_VM_READ = 0x10;
+
+const uint MEM_COMMIT = 0x1000;
+const uint PAGE_READWRITE = 4;```
+
+
+
+
+
+
+
+
+```string processName = "HD-Player"; // Specify your target process name
+string dllResourceName = "Nazmul_Awm_v2.nazmul.dll"; // Correct resource name
+
+// Extract the embedded msdrmi.dll to a temporary file
+string tempDllPath = Path.Combine(Path.GetTempPath(), "nazmul.dll");
+ExtractEmbeddedResource(dllResourceName, tempDllPath);
+
+Console.WriteLine($"DLL extracted successfully to: {tempDllPath}");
+
+
+Process[] targetProcesses = Process.GetProcessesByName(processName);
+if (targetProcesses.Length == 0)
+{
+    Console.WriteLine($"Waiting for {processName}.exe...");
+}
+else
+{
+    Process targetProcess = targetProcesses[0];
+    IntPtr hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ, false, targetProcess.Id);
+
+    IntPtr loadLibraryAddr = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
+    IntPtr allocMemAddress = VirtualAllocEx(hProcess, IntPtr.Zero, (IntPtr)tempDllPath.Length, MEM_COMMIT, PAGE_READWRITE);
+
+    IntPtr bytesWritten;
+    WriteProcessMemory(hProcess, allocMemAddress, System.Text.Encoding.ASCII.GetBytes(tempDllPath), (uint)tempDllPath.Length, out bytesWritten);
+
+    CreateRemoteThread(hProcess, IntPtr.Zero, IntPtr.Zero, loadLibraryAddr, allocMemAddress, 0, IntPtr.Zero);
+
+    Console.Beep(240, 300);
+    //Type Here Chams Is Already Injected or code invaible
+
+}
+```
