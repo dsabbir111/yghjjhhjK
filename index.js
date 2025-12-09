@@ -17,7 +17,7 @@ const db = admin.database();
 // Discord Bot Config
 // =====================
 const config = {
-
+  token: "MTQzMDgxNzU1NDExMjMxNTQ5Mg.GldGGb.ds11aPIkOnewXM5yzm3IdCld4aQ_9G978ky2r0",
   verify_channel: "1430363087080263824",
   verified_role: "1430367552655065138"
 };
